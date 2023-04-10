@@ -1,3 +1,5 @@
+const param = args["widgetParameter"] || "default"
+
 const path = FileManager.local().bookmarkedPath("Notes")
 
 const fmt = new DateFormatter()
@@ -8,12 +10,16 @@ const filePath = path + `/Diary/${formattedDate}.md`
 const widget = new ListWidget()
 const nextRefresh = Date.now() + 1000 * 30
 widget.refreshAfterDate = new Date(nextRefresh)
-widget.spacing = 8
+if (param == "default") {
+  widget.spacing = 8
+}
 
 // Add Title
-const title = widget.addText("Today")
-title.font = Font.blackMonospacedSystemFont(18)
-widget.addSpacer(8)
+if (param == "default") {
+  const title = widget.addText("Today")
+  title.font = Font.blackMonospacedSystemFont(18)
+  widget.addSpacer(8)
+}
 
 if (FileManager.local().fileExists(filePath)) {
   const contents = FileManager.local().readString(filePath)
@@ -29,7 +35,8 @@ if (FileManager.local().fileExists(filePath)) {
   const removeTags = str => str.replace(/#[^\s]+/g, '');
 
   // Apply both functions to each line of uncompleted todos
-  const processedTodos = uncompletedTodos.map(todo => removeTags(removeLinks(todo)));
+  let processedTodos = uncompletedTodos.map(todo => removeTags(removeLinks(todo)));
+  if (param != "default") processedTodos = processedTodos.slice(0, 3)
 
   if (processedTodos.length > 0) {
     processedTodos.forEach(t => {
@@ -47,12 +54,14 @@ if (FileManager.local().fileExists(filePath)) {
   text.font = Font.boldMonospacedSystemFont(16)
 }
 
-const stack = widget.addStack()
-stack.addSpacer()
+if (param == "default") {
+  const stack = widget.addStack()
+  stack.addSpacer()
 
-const addButton = stack.addText("+")
-addButton.font = Font.boldMonospacedSystemFont(32)
-addButton.url = "obsidian://advanced-uri?vault=Notes&commandid=quickadd%253Achoice%253A6bbad5c2-5846-4cb9-ad3a-3151327ea8c8"
+  const addButton = stack.addText("+")
+  addButton.font = Font.boldMonospacedSystemFont(32)
+  addButton.url = "obsidian://advanced-uri?vault=Notes&commandid=quickadd%253Achoice%253A6bbad5c2-5846-4cb9-ad3a-3151327ea8c8"
+}
 
 widget.presentLarge()
 
