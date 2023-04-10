@@ -29,14 +29,19 @@ if (FileManager.local().fileExists(filePath)) {
     .filter(line => line.startsWith('- [ ]'))
     .map(line => "☐ " + line.slice(6));
 
-  const removeLinks = str => str.replace(/\[\[(.*?)\]\]/g, '$1').replace(/\[(.*?)]\(.*?\)/g, '$1');
+  const removeLinks = str => str.replace(/\[\[\#?(.*?)\]\]/g, '$1').replace(/\[(.*?)\]\(.*?\)/g, '$1');
 
   // Remove tags (tokens that start with #)
   const removeTags = str => str.replace(/#[^\s]+/g, '');
 
   // Apply both functions to each line of uncompleted todos
   let processedTodos = uncompletedTodos.map(todo => removeTags(removeLinks(todo)));
-  if (param != "default") processedTodos = processedTodos.slice(0, 3)
+  if (param != "default") {
+    processedTodos = processedTodos.slice(0, 3)
+  } else {
+    processedTodos = processedTodos.slice(0, 9)
+  }
+
 
   if (processedTodos.length > 0) {
     processedTodos.forEach(t => {
@@ -44,7 +49,6 @@ if (FileManager.local().fileExists(filePath)) {
       text.lineLimit = 1
       text.url = "obsidian://advanced-uri?vault=Notes&commandid=daily-notes"
     })
-    widget.addSpacer()
   } else {
     const text = widget.addText("No more tasks today!")
     text.font = Font.boldMonospacedSystemFont(16)
@@ -54,8 +58,15 @@ if (FileManager.local().fileExists(filePath)) {
   text.font = Font.boldMonospacedSystemFont(16)
 }
 
+widget.addSpacer()
+
 if (param == "default") {
   const stack = widget.addStack()
+
+  const refreshButton = stack.addText("⟳")
+  refreshButton.font = Font.boldMonospacedSystemFont(32)
+  refreshButton.url = "scriptable:///run/Obsidian%20Tasks%20Widget"
+
   stack.addSpacer()
 
   const addButton = stack.addText("+")
@@ -66,3 +77,4 @@ if (param == "default") {
 widget.presentLarge()
 
 Script.setWidget(widget)
+
